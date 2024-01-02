@@ -1,0 +1,123 @@
+Vídeo da aula - https://www.youtube.com/watch?v=MsUL3Pgofl4
+
+1. CRIAÇÃO DE AMBIENTE VIRTUAL
+
+    - PIP - Gerenciador de pacotes do python
+
+    - Recomendado criar um ambiente virtual para cada projeto. É uma boa prática pois evita erros de compatibilidade entre as ferramentas utilizadas em determinado projeto. Mantém a instalação global mais "limpa".
+
+    - criação da pasta venv => python -m venv .venv
+        -m => chama um módulo do python
+        venv => módulo responsável por gerenciar ambientes virtuais
+        .venv => nome convencionado para atribuir à pasta onde vai ser gerado o ambiente virtual
+    
+    - ativação do venv => .\.venv\Scripts\activate
+        * O comando está correto, mas mesmo assim poderá ocorrer um erro. Por padrão, a política de execução de scripts no powershell encontra-se restrita (Get-ExecutionPolicy para ver). 
+        * Comando para retirar a restrição (Windows) => Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
+
+2. INSTALAÇÃO DAS BIBLIOTECAS
+
+    - Ambiente virtual criado e ativo, precisamos fazer a instalação do python através do PIP.
+    - pip install django => pip buscará no repositório do python, fará o download e instalará no ambiente virtual
+    - pip list => lista as bibliotecas instaladas
+
+    
+3. INICIANDO O NOVO PROJETO
+
+    - django-admin startproject (nome) .  => Trata-se de boa prática nomear o projeto com o nome "setup". O "." no final é importante, para que não seja criada uma pasta a mais com o nome setup.
+    - python manage.py runserver => comando que executará o servidor de desenvolvimento do django para já vermos o projeto funcionando. manage.py seria como se fosse o django-admin, que só é usado no início.
+    Ctrl+C => desliga o servidor
+    - Em settings altera-se o idioma (pt-br) e o timezone (America/Fortaleza)
+
+4. PROJECT & APP
+
+    - O Django divide as aplicações nesses dois conceitos. APP é um pedaço do projeto que tem relacionado a um determinado contexto. Um projeto é um conjunto de várias APPS que trabalham interagindo entre si. Ex.: Ecommerce: tem diversos gerenciamentos (produtos, usuários, comentários, o que seriam as apps). Nesse projeto, como é simples, terá no máximo duas apps. 
+
+    - python manage.py startapp todos => cria (inicializa) uma app dentro de um projeto, com uma estrutura de pastas específicas. A boa prática indica que devemos nomear a app de acordo com o seu contexto. No caso desse projeto, como é uma lista de tarefas (TO DO List), será nomeada "todos".
+
+5. ESTRUTURAS DE PASTAS EM UM PROJETO DJANGO
+
+    *GERAL
+    - manage.py => arquivo responsável por carregar todo contexto de execução do django;
+    - setup => pasta inicial do projeto
+    - settings.py => arquivo de configuração principal
+    - urls.py => arquivo responsável pelas rotas, onde serão definidas as urls do projeto. Por padrão, é definida a url ADMIN.
+    - wsgi.py => diz como a comunicação entre o projeto python (no geral) e o servidor de aplicações web será realizada, como eles conseguirão "conversar"; o django por default já entrega esse arquivo pronto para que o projeto consiga ser colocado em produção com diversos servidores de aplicação web que conhecem esse padrão do python.   
+    - asgi.py => trás a mesma idéia do wsgi, mas ele é específico para aplicações assíncronas.    
+
+    *APPS
+    - __init__.py => artefato do python, não necessariamente do django. 
+    - admin.py => Arquivo de configuração do admin. Painel administrativo que é entregue. (pode ser apagado se não forem ser utilizados comandos de admin)
+    - apps.py => Configurações específicas da app específica. 
+    - models.py => Modelos da app.
+    - tests.py => Onde serão colocados os testes automatizados. (pode ser apagado se não forem ser realizados testes)
+    - views.py => Camadas de views
+
+6. CRIAÇÃO DA PRIMEIRA TELA
+    
+    - Existem algumas apps que por padrão vem com o próprio django (podem ser encontradas em settings.py), porém as apps que serão criadas no projeto precisam ser instaladas. Elas inclusive podem ser utilizadas em múltiplos projetos. Ideia de reaproveitamento.
+    - Devemos realizar uma configuração no arquivo settings.py apontando a app criada para integrar a aplicação, e assim fazer parte do projeto. Isto é feito editando o settings com uma linha extra em INSTALLED_APPS, podendo ser realizada desta forma: "todos.apps.TodosConfig".
+
+    6.1 - Divisão de responsabilidades no DJANGO
+
+        - MTV => MODEL - TEMPLATE - VIEW. Padrão de arquitetura utilizado pelo DJANGO.  Cada uma dessas camadas possui suas próprias responsabiidades.
+            * MODEL: Relacionada com nossa base de dados. Classes Python que vão representar as entidades que a aplicação trabalha. Nesse caso, haverá uma classe que representará uma tarefa no banco.
+            * TEMPLATE: Camada de visualização, onde o usuário irá interagir com a aplicação. São as páginas WEB. Arquivos html.
+            * VIEW: Irá unir essas duas camadas. Ela vai possuir os códigos necessários para realizar as ações a medida que as requisições forem feitas. 
+        - De início serão trabalhadas as camadas de VIEWS e TEMPLATES. MODELS será vista mais pra frente. 
+
+
+    - urls.py: Definição das rotas existentes, e para cada rota, qual a view tem que ser executada -  path('', home);
+    - views.py: o que tem que ser feito quando aquela view é executada. No caso, eu tenho que renderizar um template -  return render(request, "todos/home.html");
+    - template - onde estará o HTML que eu tenho que exibir para o usuário final;
+    - model - Camada linkada ao BD, onde teremos classes python que vão representar as entidades que a aplicação trabalha. No caso, modelo de tarefas (TO DO)
+
+7. PASSOS INICIAIS
+
+    - models.py: configurar comunicação com BD, definindo os tipos de dados dos campos TO DO.
+    - db.sqlite3: arquivo de BD. Criar tabelas. Comando para o django olhar os modelos da aplicação e transformar em tabelas de BD.
+    - migrando das apps do DJANGO => $python manage.py migrate
+    - migrando model da app TO DO => $python manage.py makemigrations
+    - em migrations será criado o arquivo que vai definir o que será feito no banco de dados - 0001_initial.py
+    - O próximo passo será aplicar essa migração para finalmente ser criada a tabela no banco de dados.
+    - Toda este processo é necessário para versionamento do banco de dados, permitindo avançar e retroceder as versões do BD sem ter que realizar mudanças diretamente no banco. 
+    - FLUXO: Cria modelo -> cria migração -> aplica migração
+    - Realizar novamente a migração torna-se necessário porque agora será migrada a tabela recentemente criada, que estava faltando ("todos_todo" representando => "app_módulo")
+
+8. OUTRAS CONFIGURAÇÕES IMPORTANTES - SETTINGS.PY
+
+    8.1. Relacionados à segurança. Não se deve deixas-la expostas no código. Devemos extraí-las e isolá-las em nosso ambiente de produção (nossa máquina). Opção para isso é usar a biblioteca:
+
+    $pip install python-decouple
+
+    * criar arquivo .env e colocar essas configurações nesse arquivo, bem como outras informações que deverão ser protegidas por motivo de segurança (consultar .env para ver quais são elas).
+
+    8.2. Bancos de Dados. Informações onde ele está localizado, senha de acesso. Como no caso estamos trabalhando em um BD local, não há tanto o que se preocupar. Para isolar essas informações, precisamos instalar outra biblioteca:
+
+    $pip install dj-database-url
+
+    por necessidade de adotar um padrão suportado pelo django, visto que ele não aceita o padrão de string de conexão, como geralmente essas configurações de banco estão dispostas em variáveis de ambiente.
+
+    $pip install black
+
+    ferramenta útil para formatação do código. 
+    $black . => formata todos os arquivos do projeto
+
+    
+9. CRIANDO A PÁGINA
+
+    - A ideia fundamental gira em torno de trabalhar nas VIEWS buscando todas as tarefas cadastradas; passar as tarefas como un contexto para o render (URLs) e dentro do HTML iterar sobre cada uma dessas tarefas e exibir dentro de tabelas, listas, etc.
+
+    - buscas nos bancos de dados => usa a classe de MODELO 
+
+    
+
+
+
+
+
+    
+
+
+
+        
